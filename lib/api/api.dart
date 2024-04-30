@@ -31,4 +31,20 @@ class Api {
     }
     return null;
   }
+
+  static Future<String?> getImageFromBackend() async {
+    try {
+      final url = Uri.parse(GET_IMAGE_URL);
+      var response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        return base64Encode(response.bodyBytes);
+      } else {
+        print('Failed to fetch image. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching image: $e');
+    }
+    return null;
+  }
 }

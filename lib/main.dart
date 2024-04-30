@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -118,6 +119,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: const Text('Confirm'), // Replace with appropriate action
               onPressed: () {
                 Navigator.of(context).pop();
+                fetchImageAndShowDialog();
               },
             ),
           ],
@@ -125,4 +127,38 @@ class _MyHomePageState extends State<MyHomePage> {
       },
     );
   }
+  Future<void> fetchImageAndShowDialog() async {
+      String? imageBytes = await Api.getImageFromBackend();
+      if (imageBytes != null) {
+        showDialog<void>(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Image.memory(base64Decode(imageBytes)),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('Close'),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      } else {
+        // Show an error dialog if fetching image fails
+        showDialog<void>(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              content: Text('Failed to fetch image from backend.'),
+            );
+          },
+        );
+      }
+    }
 }
