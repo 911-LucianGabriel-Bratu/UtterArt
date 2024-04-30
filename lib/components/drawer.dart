@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:utter_art/main.dart';
 import 'package:utter_art/pages/my_images_page.dart';
@@ -30,7 +29,7 @@ class _AppDrawerState extends State<AppDrawer>{
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            DrawerHeader(child:
+            const DrawerHeader(child:
               Row(children: [
                 Text('Menu')
               ],)

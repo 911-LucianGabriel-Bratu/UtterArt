@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -8,6 +7,7 @@ import 'package:utter_art/components/upload_file_button.dart';
 
 import 'api/api.dart';
 import 'components/dialogs.dart';
+import 'database/database_helper.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,7 +16,6 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -40,6 +39,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   bool _isUploading = false;
+  final DatabaseHelper _databaseHelper = DatabaseHelper();
 
   @override
   Widget build(BuildContext context) {
@@ -69,6 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     print('File picked: ${file.name}');
                     String? prediction = await Api.uploadFile(File(file.path!));
                     if(prediction != null){
+                      if(!context.mounted) return;
                       Dialogs.showConfirmationDialog(prediction, context);
                     }
                   } else {

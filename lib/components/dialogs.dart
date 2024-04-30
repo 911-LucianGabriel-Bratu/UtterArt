@@ -1,7 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:utter_art/database/database_helper.dart';
 
 import '../api/api.dart';
 
@@ -33,10 +34,11 @@ class Dialogs {
               },
             ),
             TextButton(
-              child: const Text('Confirm'), // Replace with appropriate action
+              child: const Text('Confirm'),
               onPressed: () {
+                String textFieldPredictionText = controller.text;
+                fetchImageAndShowDialog(textFieldPredictionText, context);
                 Navigator.of(context).pop();
-                fetchImageAndShowDialog(context);
               },
             ),
           ],
@@ -44,9 +46,10 @@ class Dialogs {
       },
     );
   }
-  static Future<void> fetchImageAndShowDialog(BuildContext context) async {
+  static Future<void> fetchImageAndShowDialog(String prediction, BuildContext context) async {
     String? imageBytes = await Api.getImageFromBackend();
     if (imageBytes != null) {
+      if (!context.mounted) return;
       showDialog<void>(
         context: context,
         builder: (BuildContext context) {
@@ -56,10 +59,12 @@ class Dialogs {
               children: <Widget>[
                 Image.memory(base64Decode(imageBytes)),
                 TextButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    await saveImageAndInsertIntoDb(imageBytes, prediction);
+                    if (!context.mounted) return;
                     Navigator.of(context).pop();
                   },
-                  child: Text('Close'),
+                  child: const Text('Close'),
                 ),
               ],
             ),
@@ -67,12 +72,44 @@ class Dialogs {
         },
       );
     } else {
-      // Show an error dialog if fetching image fails
+      if (!context.mounted) return;
+      showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return const AlertDialog(
+            content: Text('Failed to fetch image from backend.'),
+          );
+        },
+      );
+    }
+  }
+  static Future<void> showImageDialog(File? imageFile, BuildContext context) async {
+    if (imageFile != null) {
       showDialog<void>(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            content: Text('Failed to fetch image from backend.'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Image.file(imageFile),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Close'),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    } else {
+      showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return const AlertDialog(
+            content: Text('Failed to display image.'),
           );
         },
       );
