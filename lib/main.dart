@@ -1,5 +1,11 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:utter_art/components/drawer.dart';
+import 'package:utter_art/components/upload_file_button.dart';
+
+import 'api/api.dart';
 
 void main() {
   runApp(const MyApp());
@@ -31,6 +37,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  bool _isUploading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -41,16 +48,81 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       drawer: const AppDrawer(),
       body: Center(
-        child: Column(
+        child:_isUploading
+            ? const CircularProgressIndicator() : Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'Home',
+            AudioUploadButton(
+              onPressed: () async {
+                try {
+                  setState(() {
+                    _isUploading = true;
+                  });
+                  FilePickerResult? result = await FilePicker.platform.pickFiles(
+                    type: FileType.audio,
+                    allowMultiple: false,
+                  );
+                  if (result != null) {
+                    PlatformFile file = result.files.first;
+                    print('File picked: ${file.name}');
+                    String? prediction = await Api.uploadFile(File(file.path!));
+                    if(prediction != null){
+                      showConfirmationDialog(prediction);
+                    }
+                  } else {
+                    print('File picking canceled');
+                  }
+                } catch (e) {
+                  print('Error picking file: $e');
+                }
+                finally {
+                  setState(() {
+                    _isUploading = false;
+                  });
+                }
+              },
             ),
-            //Add Button for upload file functionality,
           ],
         ),
       )
+    );
+  }
+
+  Future<void> showConfirmationDialog(String prediction) async {
+    TextEditingController controller = TextEditingController(text: prediction);
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Does this transcription look correct?'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                TextField(
+                  decoration: const InputDecoration(
+                    labelText: 'Transcription text',
+                  ),
+                  controller: controller,
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Confirm'), // Replace with appropriate action
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
