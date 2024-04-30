@@ -7,6 +7,7 @@ import 'package:utter_art/components/drawer.dart';
 import 'package:utter_art/components/upload_file_button.dart';
 
 import 'api/api.dart';
+import 'components/dialogs.dart';
 
 void main() {
   runApp(const MyApp());
@@ -68,7 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     print('File picked: ${file.name}');
                     String? prediction = await Api.uploadFile(File(file.path!));
                     if(prediction != null){
-                      showConfirmationDialog(prediction);
+                      Dialogs.showConfirmationDialog(prediction, context);
                     }
                   } else {
                     print('File picking canceled');
@@ -88,77 +89,4 @@ class _MyHomePageState extends State<MyHomePage> {
       )
     );
   }
-
-  Future<void> showConfirmationDialog(String prediction) async {
-    TextEditingController controller = TextEditingController(text: prediction);
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Does this transcription look correct?'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                TextField(
-                  decoration: const InputDecoration(
-                    labelText: 'Transcription text',
-                  ),
-                  controller: controller,
-                ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Confirm'), // Replace with appropriate action
-              onPressed: () {
-                Navigator.of(context).pop();
-                fetchImageAndShowDialog();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-  Future<void> fetchImageAndShowDialog() async {
-      String? imageBytes = await Api.getImageFromBackend();
-      if (imageBytes != null) {
-        showDialog<void>(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Image.memory(base64Decode(imageBytes)),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text('Close'),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      } else {
-        // Show an error dialog if fetching image fails
-        showDialog<void>(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              content: Text('Failed to fetch image from backend.'),
-            );
-          },
-        );
-      }
-    }
 }
