@@ -99,7 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       builder: (BuildContext context, setState){
                         return AlertDialog(
                           title: const Text("Record Audio"),
-                          content: Text("Press the Start Record button to record your voice."),
+                          content: const Text("Press the Start Record button to record your voice."),
                           actions: [
                             TextButton(
                                 onPressed: _isRecording ? null : () async {

@@ -46,7 +46,7 @@ class _AppDrawerState extends State<AppDrawer>{
                 Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => MyHomePage(title: "Home")
+                        builder: (context) => const MyHomePage(title: "Home")
                     )
                 )
               }

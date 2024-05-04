@@ -25,7 +25,7 @@ class Dialogs {
                     IconButton(
                       icon: const Icon(Icons.play_arrow),
                       onPressed: () async {
-                        await audioPlayer.play(DeviceFileSource(file.path!)); // Assuming file.path contains the local file path
+                        await audioPlayer.play(DeviceFileSource(file.path!));
                       },
                     ),
                     IconButton(
@@ -90,7 +90,7 @@ class Dialogs {
                     IconButton(
                       icon: const Icon(Icons.play_arrow),
                       onPressed: () async {
-                        await audioPlayer.play(DeviceFileSource(file.path!)); // Assuming file.path contains the local file path
+                        await audioPlayer.play(DeviceFileSource(file.path));
                       },
                     ),
                     IconButton(
