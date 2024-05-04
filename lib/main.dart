@@ -1,14 +1,18 @@
 import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:utter_art/components/drawer.dart';
 import 'package:utter_art/components/upload_file_button.dart';
 import 'package:record/record.dart';
+import 'package:utter_art/themes/theme.dart';
 
 import 'components/dialogs.dart';
 import 'database/database_helper.dart';
+import 'components/check_connectivity.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,12 +23,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const materialTheme = MaterialTheme(TextTheme());
+    final themeData = materialTheme.light();
     return MaterialApp(
       title: 'UtterArt',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
+      theme: themeData,
       home: const MyHomePage(title: 'Home'),
     );
   }
@@ -42,6 +45,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _isUploading = false;
   bool _isRecording = false;
   bool _hasRecorded = false;
+  bool _isConnected = false;
   String audioPath = '';
   late Record _audioRecord;
   late AudioPlayer _audioPlayer;
@@ -51,6 +55,45 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     _audioRecord = Record();
+
+    CheckConnectivity.checkInternetConnectivity().then((isConnected) {
+      if(mounted){
+        setState(() {
+          _isConnected = isConnected;
+        });
+      }
+    });
+
+    Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
+      if(mounted){
+        setState(() {
+          _isConnected = (result == ConnectivityResult.mobile ||
+              result == ConnectivityResult.wifi);
+        });
+        if(_isConnected){
+          Fluttertoast.showToast(
+            msg: "Established connection",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 3,
+            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+            textColor: Colors.black,
+            fontSize: 16.0,
+          );
+        }
+        else {
+          Fluttertoast.showToast(
+            msg: "Lost connection",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 3,
+            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+            textColor: Colors.black,
+            fontSize: 16.0,
+          );
+        }
+      }
+    });
     super.initState();
   }
 
@@ -91,7 +134,17 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.mic),
-            onPressed: () {
+            onPressed: !_isConnected ? (){
+              Fluttertoast.showToast(
+                msg: "No internet connection",
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.BOTTOM,
+                timeInSecForIosWeb: 3,
+                backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+                textColor: Colors.black,
+                fontSize: 16.0,
+              );
+            } : () {
               showDialog(
                 context: context,
                 builder: (BuildContext context) {
@@ -99,7 +152,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       builder: (BuildContext context, setState){
                         return AlertDialog(
                           title: const Text("Record Audio"),
-                          content: const Text("Press the Start Record button to record your voice."),
+                          content: const Text("Press the Start Recording button to record your voice."),
                           actions: [
                             TextButton(
                                 onPressed: _isRecording ? null : () async {
@@ -157,7 +210,17 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             AudioUploadButton(
-              onPressed: () async {
+              onPressed: !_isConnected ? () {
+                Fluttertoast.showToast(
+                  msg: "No internet connection",
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.BOTTOM,
+                  timeInSecForIosWeb: 3,
+                  backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+                  textColor: Colors.black,
+                  fontSize: 16.0,
+                );
+              } : () async {
                 try {
                   setState(() {
                     _isUploading = true;

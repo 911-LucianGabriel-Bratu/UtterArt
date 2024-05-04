@@ -8,19 +8,19 @@ class AudioUploadButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 60,
-      height: 60,
-      decoration: const BoxDecoration(
+      width: 120,
+      height: 120,
+      decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.blue,
+        color: Theme.of(context).colorScheme.inversePrimary,
       ),
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(60),
         child: const Icon(
           Icons.upload_file,
-          color: Colors.white,
-          size: 30,
+          color: Colors.black,
+          size: 60,
         ),
       ),
     );

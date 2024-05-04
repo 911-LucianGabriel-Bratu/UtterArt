@@ -22,17 +22,17 @@ class _AppDrawerState extends State<AppDrawer>{
   Widget build(BuildContext context) {
     return Drawer(
       child: Container(
-        decoration: const BoxDecoration(
-          color: Colors.amber
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.background
         ),
         alignment: Alignment.center,
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            const DrawerHeader(child:
-              Row(children: [
-                Text('Menu')
-              ],)
+            DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.inversePrimary
+              ), child: null,
             ),
             ListTile(
               title: const Row(
